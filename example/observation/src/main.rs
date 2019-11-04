@@ -27,6 +27,6 @@ fn main() {
     r.watch(|state|{
         println!("{:?}", state);
     });
-    r.reduce(&Action::Increment);
-    r.reduce(&Action::Increment);
+    r.dispatch(&Action::Increment);
+    r.dispatch(&Action::Increment);
 }

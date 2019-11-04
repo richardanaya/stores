@@ -24,7 +24,7 @@ where
         globals::get()
     }
 
-    pub fn reduce(&self, a: &A) -> Arc<Mutex<T>> {
+    pub fn dispatch(&self, a: &A) -> Arc<Mutex<T>> {
         let s = T::reduce(self.state.clone(), a);
         for w in self.watchers.lock().iter() {
             w(s.clone())

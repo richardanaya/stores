@@ -28,6 +28,6 @@ fn main() {
     r.watch(|state|{
         println!("state changed! {:?}", state);
     });
-    r.reduce(&Action::Increment);
+    r.dispatch(&Action::Increment);
 }
 ```
