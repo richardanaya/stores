@@ -2,6 +2,11 @@
 
 Reducable stores inspired by Redux
 
+```toml
+[dependencies]
+stores = "0.0.4"
+```
+
 ```rust
 struct Counter {
     v:u32
