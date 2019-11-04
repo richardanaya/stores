@@ -8,6 +8,7 @@ stores = "0.0.4"
 ```
 
 ```rust
+#[derive(Default)]
 struct Counter {
     v:u32
 }
