@@ -25,7 +25,9 @@ impl Reduceable<Action> for Counter {
 
 fn main() {
     let r = Store::<Counter,Action>::get().lock();
+    r.watch(|state|{
+        println!("state changed! {:?}", state);
+    });
     r.reduce(&Action::Increment);
-    println!("{:?}",r.state);
 }
 ```

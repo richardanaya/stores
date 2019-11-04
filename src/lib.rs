@@ -1,9 +1,9 @@
 use std::sync::Arc;
 pub use spin::Mutex;
 
-#[derive(Debug)]
 pub struct Store<T,A> where T:Default+Reduceable<A>+Sync+Send,A:Sync+Send{
     pub state:Arc<Mutex<T>>,
+    watchers:Arc<Mutex<Vec<Box<dyn Fn(Arc<Mutex<T>>)->()+Sync+Send>>>>,
     phantom: std::marker::PhantomData<A>
 }
 
@@ -13,7 +13,15 @@ impl<T,A> Store<T,A> where T:Default+Reduceable<A>+Sync+Send,A:Sync+Send{
     }
     
     pub fn reduce(&self,a:&A) -> Arc<Mutex<T>>{
-        T::reduce(self.state.clone(),a)
+        let s = T::reduce(self.state.clone(),a);
+        for w in self.watchers.lock().iter() {
+            w(s.clone())
+        }
+        s
+    }
+
+    pub fn watch<F>(&mut self, watcher:F) where F:'static+Fn(Arc<Mutex<T>>)->()+Sync+Send{
+        self.watchers.lock().push(Box::new(watcher))
     }
 }
 
@@ -21,6 +29,7 @@ impl<T,A> Default for  Store<T,A> where T:Default+Reduceable<A>+Sync+Send,A:Sync
     fn default() -> Self {
         Store::<T,A>{
             state:Arc::new(Mutex::new(T::default())),
+            watchers: Arc::new(Mutex::new(Vec::new())),
             phantom: std::marker::PhantomData
         }
     }
