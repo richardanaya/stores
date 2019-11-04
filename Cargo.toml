@@ -3,7 +3,7 @@ name = "stores"
 version = "0.0.1"
 authors = ["richard <richard>"]
 edition = "2018"
-license = "MIT or Apache-2.0"
+license = "MIT OR Apache-2.0"
 description = "a reduceable store"
 repository = "https://www.github.com/richardanaya/stores"
 
