@@ -1,14 +1,10 @@
 [package]
-name = "stores"
+name = "simple"
 version = "0.1.0"
 authors = ["richard <richard>"]
 edition = "2018"
-license = "MIT OR Apache-2.0"
-description = "a reduceable store"
-repository = "https://www.github.com/richardanaya/stores"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-globals = "0.1.3"
-spin = "0.5"
+stores = {path="../../"}

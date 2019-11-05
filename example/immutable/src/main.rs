@@ -7,14 +7,25 @@ struct Counter {
 
 enum Action {
     Increment,
+    Decrement,
+    Nothing,
 }
 
 impl Reduceable<Action> for Counter {
     fn reduce(state: State<Self>, action: &Action) -> State<Self> {
-        let mut s = state.lock();
+        let prev = &*state.lock();
         match action {
-            _ => {
-                s.v += 1;
+            Increment => {
+                return State::new(Counter{
+                    v:prev.v+1,
+                    ..*prev
+                })
+            },
+            Decrement => {
+                return State::new(Counter{
+                    v:prev.v-1,
+                    ..*prev
+                })
             }
         }
         state.clone()

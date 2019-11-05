@@ -5,13 +5,36 @@ use alloc::sync::Arc;
 use alloc::vec::Vec;
 pub use spin::Mutex;
 
+pub struct State<S> {
+    state:Arc<Mutex<S>>
+}
+
+impl<S> State<S> {
+    pub fn new(s:S) -> Self{
+        State {
+            state:Arc::new(Mutex::new(s))
+        }
+    }
+    pub fn lock(&self) -> spin::MutexGuard<S> {
+        self.state.lock()
+    }
+}
+
+impl<T> Clone for State<T> {
+    fn clone(&self) -> Self {
+        Self {
+            state:self.state.clone()
+        }
+    }
+}
+
 pub struct Store<T, A>
 where
     T: Default + Reduceable<A> + Sync + Send,
     A: Sync + Send,
 {
-    pub state: Arc<Mutex<T>>,
-    watchers: Arc<Mutex<Vec<Box<dyn Fn(Arc<Mutex<T>>) -> () + Sync + Send>>>>,
+    pub state: State<T>,
+    watchers: Arc<Mutex<Vec<Box<dyn Fn(State<T>) -> () + Sync + Send>>>>,
     phantom: core::marker::PhantomData<A>,
 }
 
@@ -24,17 +47,18 @@ where
         globals::get()
     }
 
-    pub fn dispatch(&self, a: &A) -> Arc<Mutex<T>> {
+    pub fn dispatch(&mut self, a: &A) -> State<T> {
         let s = T::reduce(self.state.clone(), a);
+        self.state = s.clone();
         for w in self.watchers.lock().iter() {
-            w(s.clone())
+            w(self.state.clone())
         }
         s
     }
 
     pub fn watch<F>(&mut self, watcher: F)
     where
-        F: 'static + Fn(Arc<Mutex<T>>) -> () + Sync + Send,
+        F: 'static + Fn(State<T>) -> () + Sync + Send,
     {
         self.watchers.lock().push(Box::new(watcher))
     }
@@ -47,7 +71,7 @@ where
 {
     fn default() -> Self {
         Store::<T, A> {
-            state: Arc::new(Mutex::new(T::default())),
+            state: State::new(T::default()),
             watchers: Arc::new(Mutex::new(Vec::new())),
             phantom: core::marker::PhantomData,
         }
@@ -56,7 +80,7 @@ where
 
 pub trait Reduceable<A>
 where
-    A: Sync + Send,
+    A: Sync + Send,Self:Sized
 {
-    fn reduce(state: Arc<Mutex<Self>>, action: &A) -> Arc<Mutex<Self>>;
+    fn reduce(state: State<Self>, action: &A) -> State<Self>;
 }

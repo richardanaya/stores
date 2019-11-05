@@ -4,19 +4,30 @@ Reducable stores inspired by Redux
 
 ```rust
 struct Counter {
-    v:u32
+    v: u32,
 }
 
-enum Action{
-    Increment
+enum Action {
+    Increment,
+    Decrement,
+    Nothing,
 }
 
 impl Reduceable<Action> for Counter {
-    fn reduce(state:Arc<Mutex<Self>>,&action:Action) -> Arc<Mutex<Self>>{
-        let mut s = state.lock();
+    fn reduce(state: State<Self>, action: &Action) -> State<Self> {
+        let prev = &*state.lock();
         match action {
-            _ => {
-                s.v += 1;
+            Increment => {
+                return State::new(Counter{
+                    v:prev.v+1,
+                    ..*prev
+                })
+            },
+            Decrement => {
+                return State::new(Counter{
+                    v:prev.v-1,
+                    ..*prev
+                })
             }
         }
         state.clone()
@@ -26,7 +37,7 @@ impl Reduceable<Action> for Counter {
 fn main() {
     let r = Store::<Counter,Action>::get().lock();
     r.watch(|state|{
-        println!("state changed! {:?}", state);
+        println!("state changed! {:?}", state.lock());
     });
     r.dispatch(&Action::Increment);
 }

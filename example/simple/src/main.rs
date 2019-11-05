@@ -12,7 +12,7 @@ enum Action {
 }
 
 impl Reduceable<Action> for Counter {
-    fn reduce(state: Arc<Mutex<Self>>, action: &Action) -> Arc<Mutex<Self>> {
+    fn reduce(state: State<Self>, action: &Action) -> State<Self> {
         let mut s = state.lock();
         match action {
             _ => {
@@ -24,10 +24,10 @@ impl Reduceable<Action> for Counter {
 }
 
 fn main() {
-    let r = Store::<Counter, Action>::get().lock();
-    println!("{:?}", r.state);
+    let mut r = Store::<Counter, Action>::get().lock();
+    println!("{:?}", r.state.lock());
     r.dispatch(&Action::Increment);
-    println!("{:?}", r.state);
+    println!("{:?}", r.state.lock());
     r.dispatch(&Action::Increment);
-    println!("{:?}", r.state);
+    println!("{:?}", r.state.lock());
 }
