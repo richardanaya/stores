@@ -8,7 +8,9 @@ stores = "0.1.0"
 ```
 
 ```rust
-#[derive(Default)]
+use stores::*;
+
+#[derive(Default,Debug)]
 struct Counter {
     v: u32,
 }
@@ -21,31 +23,34 @@ enum Action {
 
 impl Reduceable<Action> for Counter {
     fn reduce(state: State<Self>, action: &Action) -> State<Self> {
-        let prev = &*state.lock();
         match action {
-            Increment => {
-                return State::new(Counter{
+            Action::Increment => {
+                let prev = state.lock();
+                State::new(Counter{
                     v:prev.v+1,
-                    ..*prev
+                    ..*&*prev
                 })
             },
-            Decrement => {
-                return State::new(Counter{
+            Action::Decrement => {
+                let prev = state.lock();
+                State::new(Counter{
                     v:prev.v-1,
-                    ..*prev
+                    ..*&*prev
                 })
-            }
+            },
+            _ => state
         }
-        state.clone()
     }
 }
 
 fn main() {
-    let r = Store::<Counter,Action>::get().lock();
+    let mut r = Store::<Counter, Action>::get().lock();
     r.watch(|state|{
-        println!("state changed! {:?}", state.lock());
+        println!("{:?}", state.lock());
     });
     r.dispatch(&Action::Increment);
+    r.dispatch(&Action::Decrement);
+    r.dispatch(&Action::Nothing);
 }
 ```
 
