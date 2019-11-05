@@ -4,7 +4,7 @@ Reducable stores inspired by Redux
 
 ```toml
 [dependencies]
-stores = "0.0.4"
+stores = "0.1.0"
 ```
 
 ```rust
