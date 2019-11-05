@@ -28,14 +28,14 @@ impl Reduceable<Action> for Counter {
                 let prev = state.lock();
                 State::new(Counter{
                     v:prev.v+1,
-                    ..*&*prev
+                    ..*prev
                 })
             },
             Action::Decrement => {
                 let prev = state.lock();
                 State::new(Counter{
                     v:prev.v-1,
-                    ..*&*prev
+                    ..*prev
                 })
             },
             _ => state
